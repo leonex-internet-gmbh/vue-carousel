@@ -40,16 +40,16 @@
     </slot>
 
     <slot name="pagination" v-if="paginationEnabled">
-      <pagination @paginationclick="goToPage($event, 'pagination')"/>
+      <pagination @paginationclick="goToPage($event, 'pagination')" />
     </slot>
   </div>
 </template>
 <script>
 import autoplay from "./mixins/autoplay";
-import debounce from "./utils/debounce";
 import Navigation from "./Navigation.vue";
 import Pagination from "./Pagination.vue";
 import Slide from "./Slide.vue";
+import debounce from "./utils/debounce";
 
 const transitionStartNames = {
   onwebkittransitionstart: "webkitTransitionStart",
@@ -98,7 +98,10 @@ export default {
       dragOffset: 0,
       dragStartY: 0,
       dragStartX: 0,
-      isTouch: typeof window !== "undefined" && "ontouchstart" in window,
+      isTouch:
+        (typeof window !== "undefined" && "ontouchstart" in window) ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0,
       offset: 0,
       refreshRate: 16,
       slideCount: 0,
@@ -107,8 +110,7 @@ export default {
       currentHeight: "auto"
     };
   },
-  mixins: [autoplay],
-  // use `provide` to avoid `Slide` being nested with other components
+  mixins: [autoplay], // use `provide` to avoid `Slide` being nested with other components
   provide() {
     return {
       carousel: this
@@ -714,11 +716,11 @@ export default {
           this.$emit("pagination-click", page);
         }
       }
-    },
+    }
     /**
      * Trigger actions when mouse is pressed
      * @param  {Object} e The event object
-     */
+     */,
     /* istanbul ignore next */
     onStart(e) {
       // alert("start");
@@ -831,6 +833,8 @@ export default {
       }
     },
     onResize() {
+      if (this.isTouch && window.innerWidth === this.browserWidth) return;
+
       this.computeCarouselWidth();
       this.computeCarouselHeight();
 
